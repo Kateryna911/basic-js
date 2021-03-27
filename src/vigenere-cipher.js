@@ -1,52 +1,63 @@
-const alph = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+const CustomError = require("../extensions/custom-error");
 
 class VigenereCipheringMachine {
-    encrypt(message, key) {
-        message = message.toUpperCase();
-        let messageCodes = [];
-        let keys = key.toUpperCase();
-        let j = 0;
-        if (!this.algoDirection)
-            message = message.split("").reverse();
-        for (let i = 0; i < message.length; i++) {
-            if (alph.includes(message[i])) {
-                let index = ((alph.indexOf(message[i]) + alph.indexOf(keys[j])) % 26);
-                let tmp = alph[index];
-                messageCodes.push(tmp);
-                j++;
-                if (j == keys.length)
-                    j = 0;
-            } else
-                messageCodes.push(message[i]);
-        }
-        return messageCodes.join("");
+  constructor(type) {
+    this.type = type;
+    this.alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+    this.codeOfA = this.alphabet[0].charCodeAt();
+  }
+
+  encrypt(message, key) {
+    if (message == undefined || key == undefined) {
+      throw new Error("Message or key not specified");
     }
 
-    decrypt(message, key) {
-        message = message.toUpperCase();
-        let messageCodes = [];
-        let keys = key.toUpperCase();
-        let j = 0;
-        if (!this.algoDirection)
-            message = message.split("").reverse();
+    message = message.toUpperCase().split("");
+    key = key.toUpperCase();
 
-        for (let i = 0; i < message.length; i++) {
-            if (alph.includes(message[i])) {
-                let index = (((alph.indexOf(message[i]) - alph.indexOf(keys[j])) + 26) % 26);
-                let tmp = alph[index];
-                messageCodes.push(tmp);
-                j++;
-                if (j == keys.length)
-                    j = 0;
-            } else
-                messageCodes.push(message[i]);
-        }
-        return messageCodes.join("");
+    let count = 0;
+
+    for (let i = 0; i < message.length; i++) {
+      if (this.alphabet.includes(message[i])) {
+        message[i] = String.fromCharCode(
+          ((message[i].charCodeAt() + key[count % key.length].charCodeAt()) %
+            this.alphabet.length) +
+            this.codeOfA
+        );
+        count++;
+      }
     }
-    constructor(algoDirect = true) {
-        this.algoDirection = algoDirect;
-        return this.algoDirection;
+
+    return this.type === false ? message.reverse().join("") : message.join("");
+  }
+
+  decrypt(encryptedMessage, key) {
+    if (encryptedMessage == undefined || key == undefined) {
+      throw new Error("Encrypted message or key not specified");
     }
+
+    encryptedMessage = encryptedMessage.toUpperCase().split("");
+    key = key.toUpperCase();
+
+    let count = 0;
+
+    for (let i = 0; i < encryptedMessage.length; i++) {
+      if (this.alphabet.includes(encryptedMessage[i])) {
+        encryptedMessage[i] = String.fromCharCode(
+          ((encryptedMessage[i].charCodeAt() +
+            this.alphabet.length -
+            key[count % key.length].charCodeAt()) %
+            this.alphabet.length) +
+            this.codeOfA
+        );
+        count++;
+      }
+    }
+
+    return this.type === false
+      ? encryptedMessage.reverse().join("")
+      : encryptedMessage.join("");
+  }
 }
 
 module.exports = VigenereCipheringMachine;

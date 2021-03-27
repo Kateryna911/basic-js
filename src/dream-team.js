@@ -1,14 +1,19 @@
-module.exports = function createDreamTeam(arr) {
-  let newName = '';    
+const CustomError = require("../extensions/custom-error");
 
-  if (!Array.isArray(arr)) {
+module.exports = function createDreamTeam(members) {
+  if (!Array.isArray(members)) {
     return false;
   }
 
-  for(let i = 0; i<arr.length; i++){
-    if(typeof arr[i] === 'string'){
-      newName += arr[i].trim().substr(0,1);
+  let firstLetters = [];
+
+  for (let name of members) {
+    if (typeof name === "string") {
+      firstLetters.push(name.trim().charAt(0).toUpperCase());
+    }
   }
-}
-  return newName.toLocaleLowerCase().split('').sort().join('').toUpperCase();
-}
+
+  let dreamTeamName = firstLetters.sort().join('');
+
+  return dreamTeamName;
+};

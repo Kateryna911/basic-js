@@ -1,30 +1,44 @@
+const CustomError = require("../extensions/custom-error");
+
 module.exports = function transform(arr) {
-    let result = []
-    if (!Array.isArray(arr)) {
-        throw "Error";
-    }
-    for (let i = 0; i < arr.length; i++) {
-        switch (arr[i]) {
-            case '--discard-next':
-                i++;
-                break;
-            case '--discard-prev':
-                result.pop();
-                break;
-            case '--double-next':
-                if (i + 1 !== arr.length) {
-                    result.push(arr[i + 1]);
-                }
-                break;
-            case '--double-prev':
-                if (i - 1 > 0) {
-                    result.push(arr[i - 1]);
-                }
-                break;
-            default:
-                result.push(arr[i]);
-                break;
+  if (!Array.isArray(arr)) {
+    throw new Error("arr isn't an Array!");
+  }
+
+  const controlSequences = {
+    discardNext: "--discard-next",
+    discardPrev: "--discard-prev",
+    doubleNext: "--double-next",
+    doublePrev: "--double-prev",
+  };
+
+  let transformedArray = [];
+
+  for (let i = 0; i < arr.length; i++) {
+    switch (arr[i]) {
+      case controlSequences.discardNext:
+        if (i < arr.length - 1) {
+          i++;
         }
+        break;
+      case controlSequences.discardPrev:
+        if (i != 0 && arr[i - 2] != controlSequences.discardNext) {
+          transformedArray.pop();
+        }
+        break;
+      case controlSequences.doubleNext:
+        if (i < arr.length - 1) {
+          transformedArray.push(arr[i + 1]);
+        }
+        break;
+      case controlSequences.doublePrev:
+        if (i != 0 && arr[i - 2] != controlSequences.discardNext) {
+          transformedArray.push(arr[i - 1]);
+        }
+        break;
+      default:
+        transformedArray.push(arr[i]);
     }
-    return result;
+  }
+  return transformedArray;
 };
